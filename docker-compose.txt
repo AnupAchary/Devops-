@@ -1,0 +1,59 @@
+ubuntu@ip-192-168-51-60:~/docker$ sudo vim docker-compose.yaml
+      - "8070:80"
+    networks:
+      - artivatic_bkd_net
+    deploy:
+        replicas: 1
+        restart_policy:
+          condition: on-failure
+  choice-videokyc-ui:
+    image: avdldevops/ui:choice-kyc-prod
+    ports:
+      - "8071:80"
+    networks:
+     - artivatic_bkd_net
+    deploy:
+        replicas: 1
+        restart_policy:
+          condition: on-failure
+
+  choice-Backend:
+    image : avdldevops/choice-backend:latest-release
+    environment:
+      - redis_url=redis://insure-prod-celery.g9zx43.ng.0001.aps1.cache.amazonaws.com:6379
+      - celery=redis://insure-prod-celery.g9zx43.ng.0001.aps1.cache.amazonaws.com:6379
+      - DEBUG=False
+      - DB_ENGINE=django.db.backends.postgresql_psycopg2
+      - DB_USER=insure_db
+      - DB_NAME=insure_prod_db
+      - DB_PASSWORD=insurechoice123!
+      - DB_HOST=insure-prod-db.cax8bby9jxsd.ap-south-1.rds.amazonaws.com
+      - DB_PORT=5033
+      - CONN_MAX_AGE=None
+      - S3_access_key=
+      - S3_secret_key=
+      - S3_bucket_name=insure-prod-app-1
+      - S3_region=ap-south-1
+      - CLIENT_S3_BUCKET_NAME=chsbc-prod-ingenium
+      - MCHOICE_DOMAIN=https://egw-prod.canarahsbclife.com
+      - OCR_IP=http://192.168.51.60:5504
+
+        #    volumes:
+        #      - "/home/ubuntu/docker/bkd_media:/target/media"
+    networks:
+      - artivatic_bkd_net
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          cpus: '2'
+          memory: 5000M
+        reservations:
+          cpus: '1'
+          memory: 2000M
